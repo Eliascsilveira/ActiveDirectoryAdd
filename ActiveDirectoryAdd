@@ -1,0 +1,31 @@
+Import-Csv -Path .\desktop\fakenamegererator.com_21d4fd0.csv -Delimiter ',' - PipelineVariable User | ForEach-Object - Process {
+	$password = -join ((65..90> + (97..122) + (48..57) | Get-Random - Count 20 |ForEach-Object -Process {[char]$_} )
+	$securePassword = ConvertTo-SecureString -String $password -AsPlainText -Force
+	$San = "{0}.{1}.{2}" -f $User.GivenName, $User.MiddleInitial, $User.Surname
+	$SamAccountName = ([Text.Encoding]::ASCII.GetString([Text.Encoding]::GetEncoding("Cyrillic").GetBytes($San))).ToLower()
+	
+	$NewAdUserParameters = @{
+		GivenName = $User.Ginenname
+		Surname = $User.Surname
+		Displayname = ('{0} {1}' -f $User.GivenName, $User.Surname)
+		Name = $SamAcconuntName
+		Description = 'Usuário criado via Script'
+		AccountPassword = $securePassword
+		Department = $User.TropicalZodiac
+		Enable = %True
+		UserPrincipalName = '{0}@{1}' -f $SamAccountName, $((Get-ADDomain).DNSRoot)
+		ChangePasswordAtLogon = $True
+		OtherAttribuites = @{
+			telephoneNumber = $User.TelephoneNumber
+		}
+		State = $User.StateFull
+		City = $User.City
+		StreetAddress = $User.StreetAdress
+		PostalCode = $User.StreetAddress
+		PostalCode = $User.ZipCode
+		Contry = $User.Contry
+		Title = $User.Contry
+		Company = User.Company
+		Verbose= $true
+	}
+	New-AdUser @NewAdUserParameters
